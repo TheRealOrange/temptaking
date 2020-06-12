@@ -7,10 +7,13 @@ RUN apk add chromium-chromedriver
 ENV CHROME_BIN=/usr/bin/chromium-browser \
     CHROME_PATH=/usr/lib/chromium/
 
+WORKDIR /build
+
+RUN rm ./build/libs/*
+RUN ./gradlew shadowJar --info
+
 RUN mkdir /app
-COPY . /app
+WORKDIR /app
+RUN mv /build/libs/temptaking-* ./
 
-RUN rm /app/build/libs/*
-RUN /app/gradlew shadowJar --no-daemon
-
-CMD ["java", "/app/build/libs/temptaking-*"]
+CMD ["java", "-jar", "./build/libs/temptaking.jar"]

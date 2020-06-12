@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
 
-val BOT_TOKEN = File("./token").readText()
+val BOT_TOKEN = File("./app_config").readText()
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 
 suspend fun main() {

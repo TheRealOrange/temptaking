@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  temptaking:
+    build:
+      context: ./
+    volumes:
+    - "./:/build"
+    image: temptaking:1.0
+    logging:
+      driver: "json-file"
+    configs:
+      - source: config
+        target: /app/app_config
+        uid: '103'
+        gid: '103'
+        mode: 0440
+
