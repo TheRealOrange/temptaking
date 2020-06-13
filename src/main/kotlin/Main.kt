@@ -15,6 +15,7 @@ import java.io.File
 @UnstableDefault
 val CONFIG = Json.parse(Config.serializer(),File("./app_config.json").readText())
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+@UnstableDefault
 lateinit var database: Database
 
 @UnstableDefault
@@ -27,7 +28,8 @@ suspend fun main() {
     bot(CONFIG.token) {
         commands("$") {
             command("help-temptaking") {
-                reply("hello")
+                if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
+                else reply("Commands:\n```\$register [email] [password]```    use this command to register with the bot\n```\$deregister```    use this command to deregister")
             }
 
             command("register") {
