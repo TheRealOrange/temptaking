@@ -7,4 +7,6 @@ services:
     image: temptaking:1.0
     logging:
       driver: json-file
+    volumes:
+    - "./data:/app/data"
 
