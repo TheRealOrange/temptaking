@@ -32,7 +32,7 @@ suspend fun main() {
 
             command("register") {
                 if (guildId != null) {
-                    //this.delete()
+                    if (CONFIG.delete) this.delete()
                     reply("Please perform operations by DM")
                 } else if (this.content.split(" ").size != 3) {
                     //this.delete()
@@ -57,7 +57,7 @@ suspend fun main() {
 
             command("deregister") {
                 if (guildId != null) {
-                    //this.delete()
+                    if (CONFIG.delete) this.delete()
                     reply("Please perform operations by DM")
                 } else {
                     if (database.exists(authorId)) {
