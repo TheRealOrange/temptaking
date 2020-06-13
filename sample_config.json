@@ -1,0 +1,7 @@
+{
+  "token": bot_token_here,
+  "userFile": "data/users.json",
+  "waitTime": 5,
+  "polling": 15,
+  "delete": true
+}
