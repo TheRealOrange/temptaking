@@ -29,7 +29,7 @@ suspend fun main() {
         commands("$") {
             command("help-temptaking") {
                 if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
-                else reply("Commands:\n```\$register [email] [password]```    use this command to register with the bot\n```\$deregister```    use this command to deregister")
+                else reply("Commands:\n`\$register [email] [password]`    use this command to register with the bot\n`\$deregister`    use this command to deregister")
             }
 
             command("register") {
