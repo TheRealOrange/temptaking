@@ -1,2 +1,7 @@
 Dockerfile
 docker-compose.yml
+.idea
+.gradle
+build
+gradlew
+gradlew.bat

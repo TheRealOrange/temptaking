@@ -1,22 +1,30 @@
 import ch.qos.logback.classic.Level
-import com.jessecorbett.diskord.dsl.*
 import ch.qos.logback.classic.Logger
-import com.jessecorbett.diskord.util.*
-import org.openqa.selenium.By
-import org.openqa.selenium.Keys
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated
-import org.openqa.selenium.support.ui.WebDriverWait
+import com.jessecorbett.diskord.dsl.bot
+import com.jessecorbett.diskord.dsl.command
+import com.jessecorbett.diskord.dsl.commands
+import com.jessecorbett.diskord.util.authorId
+import config.Config
+import database.Database
+import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.json.Json
+import msforms.Form
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.time.Duration
 
-val BOT_TOKEN = File("./app_config").readText()
+@UnstableDefault
+val CONFIG = Json.parse(Config.serializer(),File("./app_config").readText())
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+lateinit var database: Database
 
+@UnstableDefault
 suspend fun main() {
     root.level = Level.INFO
-    bot(BOT_TOKEN){
+
+    database = Database(File(CONFIG.userFile))
+    Form.setTimeout(CONFIG.waitTime.toLong())
+
+    bot(CONFIG.token) {
         commands("$") {
             command("help-temptaking") {
                 reply("hello")
@@ -25,20 +33,37 @@ suspend fun main() {
             command("register") {
                 if (guildId != null) {
                     this.delete()
-                    reply("please dm \$register to the bot instead")
+                    reply("Please perform operations by DM")
                 } else if (this.content.split(" ").size != 3) {
+                    this.delete()
                     reply("please use \$register [email] [password]")
                 } else {
-                    val driver = ChromeDriver()
-                    val wait = WebDriverWait(driver, Duration.ofSeconds(10))
-                    try {
-                        driver.get("https://google.com/ncr")
-                        driver.findElement(By.name("q")).sendKeys("cheese" + Keys.ENTER)
-                        val firstResult = wait.until(presenceOfElementLocated(By.cssSelector("h3>div")))
-                        reply(firstResult.getAttribute("textContent"))
-                    } finally {
-                        driver.quit()
+                    reply("Validating credentials")
+                    this.delete()
+                    val params = this.content.split(" ")
+                    val username = params[1]
+                    val password = params[2]
+                    if (!Form.verifyLogin(username, password))
+                        reply("Invalid username and/or password, please try again")
+                    else {
+                        if (database.exists(authorId)) reply("You have already registered, type \$deregister to deregister.")
+                        else {
+                            database.register(authorId, username, password)
+                            reply("You have been successfully registered")
+                        }
                     }
+                }
+            }
+
+            command("deregister") {
+                if (guildId != null) {
+                    this.delete()
+                    reply("Please perform operations by DM")
+                } else {
+                    if (database.exists(authorId)) {
+                        database.deregister(authorId)
+                        reply("You have successfully deregistered")
+                    } else reply("You have not yet registered, use \$regieter to register")
                 }
             }
         }

@@ -6,18 +6,28 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 @UnstableDefault
-class Database {
-    lateinit var file: File
-    val users = mutableMapOf<String, User>()
+class Database(f: File) {
+    private var file = f
+    private val users = mutableMapOf<String, User>()
 
-    fun init(file: File) {
-        this.file = file
+    init {
+        if (file.exists())
+            println("Database file found")
+        else {
+            println("Database file not found, creating new file")
+            f.createNewFile()
+            saveData()
+        }
         loadData()
     }
+
+    fun exists(discordUsername: String) = users.containsKey(discordUsername)
 
     fun register(discordUsername: String, msEmail: String, msPassword: String) {
         users[discordUsername] = User(discordUsername, msEmail, msPassword)
     }
+
+    fun deregister(discordUsername: String) = users.remove(discordUsername)
 
     fun loadData() {
         val data = file.readText()
