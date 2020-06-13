@@ -9,4 +9,5 @@ services:
       driver: json-file
     volumes:
     - "./data:/app/data"
+    container_name: "temptaking_bot"
 
