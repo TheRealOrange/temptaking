@@ -18,6 +18,8 @@ object Form {
     val passwordField = "//*[@id=\"i0118\"]"
     val dontStaySignedIn = "//*[@id=\"idBtn_Back\"]"
 
+    val usernameWait = "//*[@id=\"displayName\"]"
+
     val temperatureField = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[1]/div[2]/div[2]/div/div[2]/div[3]/div/div/div/input"
     val sendEmailReceipt = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[1]/div[2]/div[3]/div/div/label/input"
     val submitButton = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[1]/div[2]/div[4]/div/button/div"
@@ -48,6 +50,7 @@ object Form {
             driver.get(url)
             val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
+            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
             val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
 
@@ -71,6 +74,7 @@ object Form {
             driver.get(url)
             val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
+            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
             val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
 
@@ -80,7 +84,7 @@ object Form {
             val sendReceipt = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(sendEmailReceipt)))
             val submitForm = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath(submitButton))))
 
-            tempInput.sendKeys(temp.toString())
+            tempInput.sendKeys(String.format("%.1f", temp))
             sendReceipt.click()
             submitForm.click()
         } finally {

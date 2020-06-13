@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 @UnstableDefault
-val CONFIG = Json.parse(Config.serializer(),File("./app_config").readText())
+val CONFIG = Json.parse(Config.serializer(),File("./app_config.json").readText())
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 lateinit var database: Database
 
@@ -21,7 +21,7 @@ lateinit var database: Database
 suspend fun main() {
     root.level = Level.INFO
 
-    database = Database(File(CONFIG.userFile))
+    database = Database(File(CONFIG.userFile), CONFIG.polling)
     Form.setTimeout(CONFIG.waitTime.toLong())
 
     bot(CONFIG.token) {
@@ -32,14 +32,14 @@ suspend fun main() {
 
             command("register") {
                 if (guildId != null) {
-                    this.delete()
+                    //this.delete()
                     reply("Please perform operations by DM")
                 } else if (this.content.split(" ").size != 3) {
-                    this.delete()
+                    //this.delete()
                     reply("please use \$register [email] [password]")
                 } else {
                     reply("Validating credentials")
-                    this.delete()
+                    //this.delete()
                     val params = this.content.split(" ")
                     val username = params[1]
                     val password = params[2]
@@ -57,13 +57,13 @@ suspend fun main() {
 
             command("deregister") {
                 if (guildId != null) {
-                    this.delete()
+                    //this.delete()
                     reply("Please perform operations by DM")
                 } else {
                     if (database.exists(authorId)) {
                         database.deregister(authorId)
                         reply("You have successfully deregistered")
-                    } else reply("You have not yet registered, use \$regieter to register")
+                    } else reply("You have not yet registered, use \$register [email] [password] to register")
                 }
             }
         }

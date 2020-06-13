@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Config(
     val token: String,
     val userFile: String,
-    val waitTime: Int
+    val waitTime: Int,
+    val polling: Int
 )
