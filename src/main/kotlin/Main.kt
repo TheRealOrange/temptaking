@@ -73,7 +73,7 @@ suspend fun main() {
 
             command("time") {
                 val DATE_FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
-                reply("System time:" + DateTimeFormatter.ofPattern(DATE_FORMATTER).format(LocalDateTime.now()))
+                reply("System time: " + DateTimeFormatter.ofPattern(DATE_FORMATTER).format(LocalDateTime.now()))
             }
         }
     }
