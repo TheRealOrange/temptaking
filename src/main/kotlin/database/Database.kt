@@ -80,10 +80,12 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
 
     fun setEmailReceipt(discordUsername: String, enable: Boolean) {
         users[discordUsername]?.emailReceipt  = enable
+        saveData()
     }
 
     fun setNotify(discordUsername: String, enable: Boolean) {
         users[discordUsername]?.notify  = enable
+        saveData()
     }
 
     fun loadData() {
