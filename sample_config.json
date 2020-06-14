@@ -4,5 +4,6 @@
   "webdriver_wait_time": 5,
   "polling_rate": 15,
   "delete_msgs_in_server": true,
+  "randomise_time": true,
   "UTC_offset_hrs": 8
 }
