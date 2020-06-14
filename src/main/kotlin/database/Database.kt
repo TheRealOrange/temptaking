@@ -39,6 +39,7 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
 
         Timer().scheduleAtFixedRate(timerTask {
             println("checking temperature task")
+            println("${LocalDateTime.now().hour} and taken is $taken")
             val now = timeNow()
             if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (LocalDateTime.now().hour == 6 && !taken) {
