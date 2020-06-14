@@ -49,11 +49,13 @@ suspend fun main() {
         }
         commands("$") {
             command("help-temptaking") {
+                root.info("command HELP-TEMPTAKING issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
                 else reply("Commands:\n`\$register [email] [password]`        use this command to register with the bot\n`\$deregister`        use this command to deregister\n`\$settings help`        use this command to change settings")
             }
 
             command("register") {
+                root.info("command REGISTER issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) {
                     if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
@@ -82,6 +84,7 @@ suspend fun main() {
             }
 
             command("deregister") {
+                root.info("command DEREGISTER issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) {
                     if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
@@ -94,11 +97,13 @@ suspend fun main() {
             }
 
             command("time") {
+                root.info("command TIME issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 val FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
                 reply("System time: ${DateTimeFormatter.ofPattern(FORMATTER).format(database.timeNow())}")
             }
 
             command("settings") {
+                root.info("command SETTINGS issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) {
                     if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
