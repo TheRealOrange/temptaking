@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
+import root
 import java.time.Duration
 
 object Form {
@@ -57,7 +58,7 @@ object Form {
             val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
             valid = true
         } catch(e: TimeoutException) {
-            println("invalid login")
+            root.info("invalid login")
             valid = false
         } finally {
             driver.quit()
@@ -69,6 +70,7 @@ object Form {
         val driver = ChromeDriver(options)
         val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
         try {
+            root.info("filling form for user $userName")
             driver.get(url)
             val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
@@ -85,6 +87,7 @@ object Form {
             tempInput.sendKeys(String.format("%.1f", temp))
             if (email) sendReceipt.click()
             submitForm.click()
+            root.info("form filled for user $userName")
         } finally {
             driver.quit()
         }

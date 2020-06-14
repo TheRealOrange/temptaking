@@ -5,6 +5,7 @@ import database.data.Users
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import msforms.Form
+import root
 import java.io.File
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -29,25 +30,25 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
 
     init {
         if (file.exists())
-            println("Database file found")
+            root.info("Database file found")
         else {
-            println("Database file not found, creating new file")
+            root.info("Database file not found, creating new file")
             f.createNewFile()
             saveData()
         }
         loadData()
 
         Timer().scheduleAtFixedRate(timerTask {
-            println("checking temperature task")
+            root.info("checking temperature task")
             val now = timeNow()
             println("${now.hour} and taken is $taken")
             if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (now.hour == 6 && !taken) {
-                    println("assigning tasks")
+                    root.info("assigning tasks")
                     taken = true
                     val remaining = 120 - now.minute.toLong()
                     users.forEach {
-                        println("assigning user: ${it.value.discordUsername}")
+                        root.info("assigning user: ${it.value.discordUsername}")
                         var delay = 5000L
                         if (randomTime) delay = Random.nextLong(0, remaining) * 60 * 1000
                         if (it.value.notify) scheduled.invoke(it.value.discordUsername, now.plusSeconds(delay/1000))
