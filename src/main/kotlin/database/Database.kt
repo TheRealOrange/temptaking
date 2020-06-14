@@ -42,9 +42,11 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
             val now = timeNow()
             if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (LocalDateTime.now().hour == 6 && !taken) {
+                    println("assigning tasks")
                     taken = true
                     val remaining = 120 - now.minute.toLong()
                     users.forEach {
+                        println("assigning user: ${it.value.discordUsername}")
                         var delay = 5000L
                         if (randomTime) delay = Random.nextLong(0, remaining) * 60 * 1000
                         if (it.value.notify) scheduled.invoke(it.value.discordUsername, now.plusSeconds(delay/1000))
