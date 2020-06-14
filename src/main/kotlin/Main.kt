@@ -24,10 +24,10 @@ lateinit var database: Database
 suspend fun main() {
     root.level = Level.INFO
 
-    database = Database(File(CONFIG.userFile), CONFIG.polling)
-    Form.setTimeout(CONFIG.waitTime.toLong())
+    database = Database(File(CONFIG.user_file), CONFIG.polling_rate, CONFIG.UTC_offset_hrs)
+    Form.setTimeout(CONFIG.webdriver_wait_time.toLong())
 
-    bot(CONFIG.token) {
+    bot(CONFIG.bot_token) {
         commands("$") {
             command("help-temptaking") {
                 if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
@@ -36,7 +36,7 @@ suspend fun main() {
 
             command("register") {
                 if (guildId != null) {
-                    if (CONFIG.delete) this.delete()
+                    if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
                 } else if (this.content.split(" ").size != 3) {
                     //this.delete()
@@ -61,7 +61,7 @@ suspend fun main() {
 
             command("deregister") {
                 if (guildId != null) {
-                    if (CONFIG.delete) this.delete()
+                    if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
                 } else {
                     if (database.exists(authorId)) {
@@ -73,7 +73,7 @@ suspend fun main() {
 
             command("time") {
                 val DATE_FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
-                reply("System time: " + DateTimeFormatter.ofPattern(DATE_FORMATTER).format(LocalDateTime.now()))
+                reply("System time: " + DateTimeFormatter.ofPattern(DATE_FORMATTER).format(database.timeNow()))
             }
         }
     }

@@ -8,16 +8,18 @@ import msforms.Form
 import java.io.File
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.random.Random
 
 @UnstableDefault
-class Database(f: File, minutes: Int) {
+class Database(f: File, minutes: Int, offset: Int) {
     private var file = f
     private val users = mutableMapOf<String, User>()
     private var time: Long = (minutes*60*1000).toLong()
     private var taken = false
+    private var zoneOffset = ZoneOffset.ofHours(offset)
 
     init {
         if (file.exists())
@@ -30,10 +32,11 @@ class Database(f: File, minutes: Int) {
         loadData()
 
         Timer().scheduleAtFixedRate(timerTask {
-            if (LocalDateTime.now().dayOfWeek != DayOfWeek.SATURDAY && LocalDateTime.now().dayOfWeek != DayOfWeek.SUNDAY) {
+            val now = timeNow()
+            if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (LocalDateTime.now().hour == 6 && !taken) {
                     taken = true
-                    val remaining = 120 - LocalDateTime.now().minute.toLong()
+                    val remaining = 120 - now.minute.toLong()
                     users.forEach {
                         val delay = Random.nextLong(0, remaining) * 60 * 1000
                         Timer().schedule(timerTask {
@@ -44,10 +47,12 @@ class Database(f: File, minutes: Int) {
                             )
                         }, delay)
                     }
-                } else if (LocalDateTime.now().hour > 9) taken = false
+                } else if (now.hour > 9) taken = false
             }
         },2000,time)
     }
+
+    fun timeNow() = LocalDateTime.now().atZone(ZoneOffset.UTC).withZoneSameInstant(zoneOffset).toLocalDateTime()
 
     fun exists(discordUsername: String) = users.containsKey(discordUsername)
 

@@ -1,7 +1,8 @@
 {
-  "token": "bot_token_here",
-  "userFile": "data/users.json",
-  "waitTime": 5,
-  "polling": 15,
-  "delete": true
+  "bot_token": "bot token here",
+  "user_file": "data/users.json",
+  "webdriver_wait_time": 5,
+  "polling_rate": 15,
+  "delete_msgs_in_server": true,
+  "UTC_offset_hrs": 8
 }
