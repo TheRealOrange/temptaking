@@ -11,6 +11,8 @@ import kotlinx.serialization.json.Json
 import msforms.Form
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @UnstableDefault
 val CONFIG = Json.parse(Config.serializer(),File("./app_config.json").readText())
@@ -67,6 +69,11 @@ suspend fun main() {
                         reply("You have successfully deregistered")
                     } else reply("You have not yet registered, use \$register [email] [password] to register")
                 }
+            }
+
+            command("time") {
+                val DATE_FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
+                reply("System time:" + DateTimeFormatter.ofPattern(DATE_FORMATTER).format(LocalDateTime.now()))
             }
         }
     }
