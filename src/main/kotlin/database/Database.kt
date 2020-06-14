@@ -14,12 +14,18 @@ import kotlin.concurrent.timerTask
 import kotlin.random.Random
 
 @UnstableDefault
-class Database(f: File, minutes: Int, offset: Int) {
+class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifyScheduled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, notifyFilled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }) {
     private var file = f
     private val users = mutableMapOf<String, User>()
     private var time: Long = (minutes*60*1000).toLong()
     private var taken = false
+
     private var zoneOffset = ZoneOffset.ofHours(offset)
+
+    private val randomTime = randomise
+
+    private val scheduled = notifyScheduled
+    private val filled = notifyFilled
 
     init {
         if (file.exists())
@@ -38,13 +44,17 @@ class Database(f: File, minutes: Int, offset: Int) {
                     taken = true
                     val remaining = 120 - now.minute.toLong()
                     users.forEach {
-                        val delay = Random.nextLong(0, remaining) * 60 * 1000
+                        var delay = 5000L
+                        if (randomTime) delay = Random.nextLong(0, remaining) * 60 * 1000
+                        if (it.value.notify) scheduled.invoke(it.value.discordUsername, now.plusSeconds(delay/1000))
                         Timer().schedule(timerTask {
                             Form.fillForm(
                                 it.value.msEmail,
                                 it.value.msPassword,
-                                Random.nextInt(360, 370).toFloat() / 10
+                                Random.nextInt(360, 370).toFloat() / 10,
+                                it.value.emailReceipt
                             )
+                            if (it.value.notify) filled.invoke(it.value.discordUsername, timeNow())
                         }, delay)
                     }
                 } else if (now.hour > 9) taken = false
@@ -57,13 +67,23 @@ class Database(f: File, minutes: Int, offset: Int) {
     fun exists(discordUsername: String) = users.containsKey(discordUsername)
 
     fun register(discordUsername: String, msEmail: String, msPassword: String) {
-        users[discordUsername] = User(discordUsername, msEmail, msPassword)
+        users[discordUsername] = User(discordUsername, msEmail, msPassword, emailReceipt = true, notify = false)
         saveData()
     }
 
     fun deregister(discordUsername: String) {
         users.remove(discordUsername)
         saveData()
+    }
+
+    fun user(discordUsername: String) = listOf(users[discordUsername]?.emailReceipt, users[discordUsername]?.notify)
+
+    fun setEmailReceipt(discordUsername: String, enable: Boolean) {
+        users[discordUsername]?.emailReceipt  = enable
+    }
+
+    fun setNotify(discordUsername: String, enable: Boolean) {
+        users[discordUsername]?.notify  = enable
     }
 
     fun loadData() {

@@ -65,7 +65,7 @@ object Form {
         return valid
     }
 
-    fun fillForm(userName: String, password:String, temp: Float) {
+    fun fillForm(userName: String, password:String, temp: Float, email: Boolean) {
         val driver = ChromeDriver(options)
         val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
         try {
@@ -83,7 +83,7 @@ object Form {
             val submitForm = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath(submitButton))))
 
             tempInput.sendKeys(String.format("%.1f", temp))
-            sendReceipt.click()
+            if (email) sendReceipt.click()
             submitForm.click()
         } finally {
             driver.quit()
