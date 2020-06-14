@@ -38,6 +38,7 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
         loadData()
 
         Timer().scheduleAtFixedRate(timerTask {
+            println("checking temperature task")
             val now = timeNow()
             if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (LocalDateTime.now().hour == 6 && !taken) {
@@ -59,10 +60,10 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
                     }
                 } else if (now.hour > 9) taken = false
             }
-        },2000,time)
+        },10000,time)
     }
 
-    fun timeNow() = LocalDateTime.now().atZone(ZoneOffset.UTC).withZoneSameInstant(zoneOffset).toLocalDateTime()
+    fun timeNow(): LocalDateTime = LocalDateTime.now().atZone(ZoneOffset.UTC).withZoneSameInstant(zoneOffset).toLocalDateTime()
 
     fun exists(discordUsername: String) = users.containsKey(discordUsername)
 
@@ -88,13 +89,13 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
         saveData()
     }
 
-    fun loadData() {
+    private fun loadData() {
         val data = file.readText()
         val saveUsers = Json.parse(Users.serializer(), data)
         saveUsers.users.forEach { users[it.discordUsername] = it }
     }
 
-    fun saveData() {
+    private fun saveData() {
         val saveUsers = Users(users.values.toList())
         val data = Json.stringify(Users.serializer(), saveUsers)
         file.writeText(data)

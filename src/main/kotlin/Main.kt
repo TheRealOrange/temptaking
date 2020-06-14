@@ -59,7 +59,7 @@ suspend fun main() {
                     reply("Please perform operations by DM")
                 } else if (words.size != 3) {
                     //this.delete()
-                    reply("please use \$register [email] [password]")
+                    reply("please use `\$register [email] [password]`")
                 } else {
                     reply("Validating credentials")
                     //this.delete()
@@ -95,7 +95,7 @@ suspend fun main() {
 
             command("time") {
                 val FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
-                reply("System time: " + DateTimeFormatter.ofPattern(FORMATTER).format(database.timeNow()))
+                reply("System time: ${DateTimeFormatter.ofPattern(FORMATTER).format(database.timeNow())}")
             }
 
             command("settings") {
