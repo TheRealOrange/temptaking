@@ -46,19 +46,24 @@ object Form {
         val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
         var valid = false
         try {
+            root.info("validating user [user $userName] connecting")
             driver.get(url)
             val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
+            root.info("validating user [user $userName] username filled")
+
             wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
             val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
+            root.info("validating user [user $userName] password filled")
 
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(dontStaySignedIn))).click()
 
             val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
+            root.info("validating user [user $userName] validated")
             valid = true
         } catch(e: TimeoutException) {
-            root.info("invalid login")
+            root.info("validating user [user $userName] failed to validate")
             valid = false
         } finally {
             driver.quit()
@@ -70,24 +75,28 @@ object Form {
         val driver = ChromeDriver(options)
         val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
         try {
-            root.info("filling form for user $userName")
+            root.info("filling form [user $userName] connecting")
             driver.get(url)
             val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
+            root.info("filling form [user $userName] username filled")
+
             wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
             val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
+            root.info("filling form [user $userName] password filled")
 
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(dontStaySignedIn))).click()
 
             val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
             val sendReceipt = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(sendEmailReceipt)))
             val submitForm = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath(submitButton))))
+            root.info("filling form [user $userName] form loaded")
 
             tempInput.sendKeys(String.format("%.1f", temp))
             if (email) sendReceipt.click()
             submitForm.click()
-            root.info("form filled for user $userName")
+            root.info("filling form [user $userName] done")
         } finally {
             driver.quit()
         }
