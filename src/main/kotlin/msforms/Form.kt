@@ -106,7 +106,7 @@ object Form {
             root.info("filling form [user $userName] validated form fill")
             valid = true
         } catch(e: TimeoutException) {
-            root.info("validating user [user $userName] failed to validate")
+            root.info("filling form [user $userName] failed to validate")
             valid = false
         } finally {
             driver.quit()
