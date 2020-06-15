@@ -30,7 +30,12 @@ lateinit var database: Database
 suspend fun main() {
     root.level = Level.INFO
 
-    if (CONFIG.google_cloud_logging) root.addAppender(LoggingAppender())
+    if (CONFIG.google_cloud_logging) {
+        val google_logger = LoggingAppender()
+        google_logger.setFlushLevel(Level.INFO)
+        google_logger.setLog("temptaking.log")
+        root.addAppender(google_logger)
+    }
 
     bot(CONFIG.bot_token) {
         started {
