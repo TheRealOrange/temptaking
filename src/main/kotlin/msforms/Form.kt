@@ -33,7 +33,8 @@ object Form {
             "--disable-gpu",
             "--window-size=1920,1200",
             "--disable-extensions",
-            "--no-sandbox"
+            "--no-sandbox",
+            "--whitelisted-ip"
         )
     }
 

@@ -1,5 +1,6 @@
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.google.cloud.logging.logback.LoggingAppender
 import com.jessecorbett.diskord.api.rest.CreateDM
 import com.jessecorbett.diskord.api.rest.client.ChannelClient
 import com.jessecorbett.diskord.dsl.bot
@@ -28,6 +29,8 @@ lateinit var database: Database
 @UnstableDefault
 suspend fun main() {
     root.level = Level.INFO
+
+    if (CONFIG.google_cloud_logging) root.addAppender(LoggingAppender())
 
     bot(CONFIG.bot_token) {
         started {

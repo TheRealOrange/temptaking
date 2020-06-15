@@ -10,5 +10,6 @@ data class Config(
     val polling_rate: Int,
     val delete_msgs_in_server: Boolean,
     val randomise_time: Boolean,
-    val UTC_offset_hrs: Int
+    val UTC_offset_hrs: Int,
+    val google_cloud_logging: Boolean
 )

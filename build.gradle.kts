@@ -35,6 +35,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("ch.qos.logback:logback-core:$logback_version")
 
+    implementation("com.google.cloud:google-cloud-logging-logback:0.117.0-alpha")
+
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
 }
 
