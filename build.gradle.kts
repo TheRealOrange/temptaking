@@ -57,3 +57,9 @@ tasks.register("downloadDependencies") {
         println("Downloaded all dependencies: $allDeps")
     }
 }
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>() {
+    manifest {
+        attributes["Main-Class"] = "HelloKt"
+    }
+}
