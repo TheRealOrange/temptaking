@@ -36,7 +36,7 @@ object Form {
             "--window-size=1920,1200",
             "--disable-extensions",
             "--no-sandbox",
-            "--whitelisted-ip"
+            "--whitelisted-ips"
         )
     }
 
