@@ -21,7 +21,7 @@ import java.io.File
 import java.time.format.DateTimeFormatter
 
 @UnstableDefault
-val CONFIG = Json.parse(Config.serializer(),File("./data/app_config.json").readText())
+val CONFIG = Json.parse(Config.serializer(),File("data/app_config.json").readText())
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 @UnstableDefault
 lateinit var database: Database
@@ -35,6 +35,7 @@ suspend fun main() {
         googleLogger.context = root.loggerContext
         googleLogger.setFlushLevel(Level.INFO)
         googleLogger.setLog("temptaking.log")
+        googleLogger.start()
         root.addAppender(googleLogger)
     }
 

@@ -27,9 +27,10 @@ ENV CHROME_BIN=/usr/bin/chromium-browser \
     CHROME_PATH=/usr/lib/chromium/
 
 RUN mkdir /app
+RUN mkdir /app/data
 WORKDIR /app
 COPY --from=build /app/temptaking.jar ./
-COPY config.json ./data/app_config.json
+COPY config.json /app/data/app_config.json
 RUN ls
 
 CMD ["java", "-jar", "./temptaking.jar"]
