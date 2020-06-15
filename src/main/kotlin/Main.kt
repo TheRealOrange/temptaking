@@ -29,6 +29,8 @@ lateinit var database: Database
 @UnstableDefault
 suspend fun main() {
     root.level = Level.INFO
+    val dateFormatter = "EEE yyyy-MM-dd HH:mm:ss"
+    val timeFormatter = "EEE HH:mm:ss"
 
     if (CONFIG.google_cloud_logging) {
         val googleLogger = LoggingAppender()
@@ -41,18 +43,26 @@ suspend fun main() {
 
     bot(CONFIG.bot_token) {
         started {
-            val DATE_FORMATTER = "EEE HH:mm:ss"
             database = Database(File(CONFIG.user_file), CONFIG.polling_rate, CONFIG.UTC_offset_hrs, CONFIG.randomise_time,
                 notifyScheduled = { s, t ->
                     GlobalScope.launch {
                         val dm = clientStore.discord.createDM(CreateDM(s))
-                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Randomised temperature taking scheduled for ${DateTimeFormatter.ofPattern(DATE_FORMATTER).format(t)}")
+                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Randomised temperature taking scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                        root.info("NOTIFY user [${dm.id}] temperature taking scheduled")
                     }
                 },
                 notifyFilled = { s, t ->
                     GlobalScope.launch {
                         val dm = clientStore.discord.createDM(CreateDM(s))
-                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Temperature taken at ${DateTimeFormatter.ofPattern(DATE_FORMATTER).format(t)}")
+                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Temperature taken at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                        root.info("NOTIFY user [${dm.id}] temperature taking task executed")
+                    }
+                },
+                fillFailed = { s, t ->
+                    GlobalScope.launch {
+                        val dm = clientStore.discord.createDM(CreateDM(s))
+                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Error FAILED to fill form at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}, please fill in the form yourself\n${Form.url}")
+                        root.info("NOTIFY user [${dm.id}] temperature taking task FAILED")
                     }
                 })
             Form.setTimeout(CONFIG.webdriver_wait_time.toLong())
@@ -61,7 +71,7 @@ suspend fun main() {
             command("help-temptaking") {
                 root.info("command HELP-TEMPTAKING issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
-                else reply("Commands:\n`\$register [email] [password]`        use this command to register with the bot\n`\$deregister`        use this command to deregister\n`\$settings help`        use this command to change settings")
+                else reply("Commands:\n`\$register [email] [password]`        use this command to register with the bot\n`\$deregister`        use this command to deregister\n`\$settings help`        use this command to change settings\n`\$task help`        use this command to manage active task")
             }
 
             command("register") {
@@ -108,8 +118,7 @@ suspend fun main() {
 
             command("time") {
                 root.info("command TIME issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
-                val FORMATTER = "EEE yyyy-MM-dd HH:mm:ss"
-                reply("System time: ${DateTimeFormatter.ofPattern(FORMATTER).format(database.timeNow())}")
+                reply("System time: ${DateTimeFormatter.ofPattern(dateFormatter).format(database.timeNow())}")
             }
 
             command("settings") {
@@ -118,36 +127,78 @@ suspend fun main() {
                     if (CONFIG.delete_msgs_in_server) this.delete()
                     reply("Please perform operations by DM")
                 } else {
-                    var helptext = "format: `\$settings [options] [values]`\n"
-                    helptext += "\noptions:\n"
-                    helptext += "     `help` to show this again\n"
-                    helptext += "     `list` to show current settings\n"
-                    helptext += "     `email enable|disable` to toggle email receipt on form fill\n"
-                    helptext += "     `notify enable|disable` to toggle discord notifications on form fill\n"
-                    if (words.size < 2)
-                        reply(helptext)
-                    when(words[1]) {
-                        "help" -> reply(helptext)
-                        "list" -> {
-                            reply("email notifications ${ if(database.user(authorId)[0]!!) "enabled" else "disabled" } \n")
-                            reply("discord notifications ${ if(database.user(authorId)[1]!!) "enabled" else "disabled" } \n")
-                        }
-                        "email" -> {
-                            if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
-                            else {
-                                database.setEmailReceipt(authorId, words[2] == "enable")
-                                reply("email notifications ${ if(database.user(authorId)[0]!!) "enabled" else "disabled" } \n")
+                    if (database.exists(authorId)) {
+                        var helptext = "format: `\$settings [options] [values]`\n"
+                        helptext += "\noptions:\n"
+                        helptext += "     `help` to show this again\n"
+                        helptext += "     `list` to show current settings\n"
+                        helptext += "     `email enable|disable` to toggle email receipt on form fill\n"
+                        helptext += "     `notify enable|disable` to toggle discord notifications on form fill\n"
+                        if (words.size < 2)
+                            reply(helptext)
+                        when (words[1]) {
+                            "help" -> reply(helptext)
+                            "list" -> {
+                                reply("email notifications ${if (database.user(authorId)[0]!!) "enabled" else "disabled"} \n")
+                                reply("discord notifications ${if (database.user(authorId)[1]!!) "enabled" else "disabled"} \n")
                             }
-                        }
-                        "notify" -> {
-                            if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
-                            else {
-                                database.setNotify(authorId, words[2] == "enable")
-                                reply("discord notifications ${ if(database.user(authorId)[1]!!) "enabled" else "disabled" } \n")
+                            "email" -> {
+                                if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
+                                else {
+                                    database.setEmailReceipt(authorId, words[2] == "enable")
+                                    reply("email notifications ${if (database.user(authorId)[0]!!) "enabled" else "disabled"} \n")
+                                }
                             }
+                            "notify" -> {
+                                if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
+                                else {
+                                    database.setNotify(authorId, words[2] == "enable")
+                                    reply("discord notifications ${if (database.user(authorId)[1]!!) "enabled" else "disabled"} \n")
+                                }
+                            }
+                            else -> reply("invalid\n$helptext")
                         }
-                        else -> reply("invalid\n$helptext")
-                    }
+                    } else reply("You have not yet registered, use `\$register [email] [password]` to register")
+                }
+            }
+
+            command("task") {
+                root.info("command TASK issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
+                if (guildId != null) {
+                    if (CONFIG.delete_msgs_in_server) this.delete()
+                    reply("Please perform operations by DM")
+                } else {
+                    if (database.exists(authorId)) {
+                        var helptext = "format: `\$task [options]`\n"
+                        helptext += "\noptions:\n"
+                        helptext += "     `help` to show this again\n"
+                        helptext += "     `show` to show current settings\n"
+                        helptext += "     `cancel` to cancel the current task\n"
+                        if (words.size < 2)
+                            reply(helptext)
+                        when (words[1]) {
+                            "help" -> reply(helptext)
+                            "show" -> {
+                                val t = database.task(authorId)
+                                if (t != null) {
+                                    reply("You have a temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                                    if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
+                                    else reply("Use `\$task cancel` to cancel")
+                                } else reply("You have no temperature taking task scheduled")
+                            }
+                            "cancel" -> {
+                                val t = database.task(authorId)
+                                if (t != null) {
+                                    if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
+                                    else {
+                                        database.cancel(authorId)
+                                        reply("The temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)} has been cancelled")
+                                    }
+                                } else reply("You have no temperature taking task scheduled")
+                            }
+                            else -> reply("invalid\n$helptext")
+                        }
+                    } else reply("You have not yet registered, use `\$register [email] [password]` to register")
                 }
             }
         }

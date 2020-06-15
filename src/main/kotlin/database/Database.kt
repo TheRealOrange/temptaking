@@ -15,7 +15,7 @@ import kotlin.concurrent.timerTask
 import kotlin.random.Random
 
 @UnstableDefault
-class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifyScheduled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, notifyFilled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }) {
+class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifyScheduled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, notifyFilled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, fillFailed: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }) {
     private var file = f
     private val users = mutableMapOf<String, User>()
     private var time: Long = (minutes*60*1000).toLong()
@@ -27,6 +27,9 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
 
     private val scheduled = notifyScheduled
     private val filled = notifyFilled
+    private val failed = fillFailed
+
+    private val scheduledTasks = mutableMapOf<String, Pair<Timer?, LocalDateTime?>>()
 
     init {
         if (file.exists())
@@ -45,6 +48,7 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
             if (now.dayOfWeek != DayOfWeek.SATURDAY && now.dayOfWeek != DayOfWeek.SUNDAY) {
                 if (now.hour == 6 && !taken) {
                     root.info("assigning tasks")
+                    scheduledTasks.clear()
                     taken = true
                     val remaining = 120 - now.minute.toLong()
                     users.forEach {
@@ -52,15 +56,18 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
                         var delay = 5000L
                         if (randomTime) delay = Random.nextLong(0, remaining) * 60 * 1000
                         if (it.value.notify) scheduled.invoke(it.value.discordUsername, now.plusSeconds(delay/1000))
-                        Timer().schedule(timerTask {
-                            Form.fillForm(
+                        val t = Timer()
+                        t.schedule(timerTask {
+                            val success = Form.fillForm(
                                 it.value.msEmail,
                                 it.value.msPassword,
                                 Random.nextInt(360, 370).toFloat() / 10,
                                 it.value.emailReceipt
                             )
                             if (it.value.notify) filled.invoke(it.value.discordUsername, timeNow())
+                            if (!success) failed.invoke(it.value.discordUsername, timeNow())
                         }, delay)
+                        scheduledTasks[it.value.discordUsername]= Pair(t, now.plusSeconds(delay/1000))
                     }
                 } else if (now.hour > 9) taken = false
             }
@@ -91,6 +98,13 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
     fun setNotify(discordUsername: String, enable: Boolean) {
         users[discordUsername]?.notify  = enable
         saveData()
+    }
+
+    fun task(discordUsername: String) = scheduledTasks[discordUsername]?.second
+
+    fun cancel(discordUsername: String) {
+        scheduledTasks[discordUsername]?.first?.cancel()
+        scheduledTasks[discordUsername] = Pair(null, null)
     }
 
     private fun loadData() {

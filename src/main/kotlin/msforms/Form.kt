@@ -23,6 +23,8 @@ object Form {
     val sendEmailReceipt = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[1]/div[2]/div[3]/div/div/label/input"
     val submitButton = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[1]/div[2]/div[4]/div/button/div"
 
+    val submittedValidate = "//*[@id=\"form-container\"]/div/div/div[1]/div/div[2]/div[1]/div[2]"
+
     val options = ChromeOptions()
 
     var waitTime: Long = 5
@@ -72,9 +74,10 @@ object Form {
         return valid
     }
 
-    fun fillForm(userName: String, password:String, temp: Float, email: Boolean) {
+    fun fillForm(userName: String, password:String, temp: Float, email: Boolean): Boolean {
         val driver = ChromeDriver(options)
         val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
+        var valid = false
         try {
             root.info("filling form [user $userName] connecting")
             driver.get(url)
@@ -92,14 +95,22 @@ object Form {
             val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
             val sendReceipt = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(sendEmailReceipt)))
             val submitForm = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath(submitButton))))
-            root.info("filling form [user $userName] form loaded")
+            root.info("filling form [user $userName] form filled")
 
             tempInput.sendKeys(String.format("%.1f", temp))
             if (email) sendReceipt.click()
             submitForm.click()
             root.info("filling form [user $userName] done")
+
+            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(submittedValidate), "Your response was submitted."))
+            root.info("filling form [user $userName] validated form fill")
+            valid = true
+        } catch(e: TimeoutException) {
+            root.info("validating user [user $userName] failed to validate")
+            valid = false
         } finally {
             driver.quit()
         }
+        return valid
     }
 }
