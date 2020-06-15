@@ -136,28 +136,30 @@ suspend fun main() {
                         helptext += "     `notify enable|disable` to toggle discord notifications on form fill\n"
                         if (words.size < 2)
                             reply(helptext)
-                        when (words[1]) {
-                            "help" -> reply(helptext)
-                            "list" -> {
-                                reply("email notifications ${if (database.user(authorId)[0]!!) "enabled" else "disabled"} \n")
-                                reply("discord notifications ${if (database.user(authorId)[1]!!) "enabled" else "disabled"} \n")
-                            }
-                            "email" -> {
-                                if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
-                                else {
-                                    database.setEmailReceipt(authorId, words[2] == "enable")
+                        else if (words.size > 1) {
+                            when (words[1]) {
+                                "help" -> reply(helptext)
+                                "list" -> {
                                     reply("email notifications ${if (database.user(authorId)[0]!!) "enabled" else "disabled"} \n")
-                                }
-                            }
-                            "notify" -> {
-                                if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
-                                else {
-                                    database.setNotify(authorId, words[2] == "enable")
                                     reply("discord notifications ${if (database.user(authorId)[1]!!) "enabled" else "disabled"} \n")
                                 }
+                                "email" -> {
+                                    if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
+                                    else {
+                                        database.setEmailReceipt(authorId, words[2] == "enable")
+                                        reply("email notifications ${if (database.user(authorId)[0]!!) "enabled" else "disabled"} \n")
+                                    }
+                                }
+                                "notify" -> {
+                                    if (words.size < 3 || !(words[2] == "enable" || words[2] == "disable")) reply("invalid\n$helptext")
+                                    else {
+                                        database.setNotify(authorId, words[2] == "enable")
+                                        reply("discord notifications ${if (database.user(authorId)[1]!!) "enabled" else "disabled"} \n")
+                                    }
+                                }
+                                else -> reply("invalid\n$helptext")
                             }
-                            else -> reply("invalid\n$helptext")
-                        }
+                        } else reply("invalid\n$helptext")
                     } else reply("You have not yet registered, use `\$register [email] [password]` to register")
                 }
             }
