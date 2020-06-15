@@ -176,28 +176,30 @@ suspend fun main() {
                         helptext += "     `cancel` to cancel the current task\n"
                         if (words.size < 2)
                             reply(helptext)
-                        when (words[1]) {
-                            "help" -> reply(helptext)
-                            "show" -> {
-                                val t = database.task(authorId)
-                                if (t != null) {
-                                    reply("You have a temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
-                                    if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
-                                    else reply("Use `\$task cancel` to cancel")
-                                } else reply("You have no temperature taking task scheduled")
+                        else if (words.size > 1) {
+                            when (words[1]) {
+                                "help" -> reply(helptext)
+                                "show" -> {
+                                    val t = database.task(authorId)
+                                    if (t != null) {
+                                        reply("You have a temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                                        if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
+                                        else reply("Use `\$task cancel` to cancel")
+                                    } else reply("You have no temperature taking task scheduled")
+                                }
+                                "cancel" -> {
+                                    val t = database.task(authorId)
+                                    if (t != null) {
+                                        if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
+                                        else {
+                                            database.cancel(authorId)
+                                            reply("The temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)} has been cancelled")
+                                        }
+                                    } else reply("You have no temperature taking task scheduled")
+                                }
+                                else -> reply("invalid\n$helptext")
                             }
-                            "cancel" -> {
-                                val t = database.task(authorId)
-                                if (t != null) {
-                                    if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
-                                    else {
-                                        database.cancel(authorId)
-                                        reply("The temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)} has been cancelled")
-                                    }
-                                } else reply("You have no temperature taking task scheduled")
-                            }
-                            else -> reply("invalid\n$helptext")
-                        }
+                        } else reply("invalid\n$helptext")
                     } else reply("You have not yet registered, use `\$register [email] [password]` to register")
                 }
             }
