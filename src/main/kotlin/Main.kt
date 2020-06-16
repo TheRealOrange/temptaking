@@ -1,6 +1,9 @@
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.logback.LoggingAppender
+import com.google.cloud.logging.logback.LoggingEventEnhancer
 import com.jessecorbett.diskord.api.rest.CreateDM
 import com.jessecorbett.diskord.api.rest.client.ChannelClient
 import com.jessecorbett.diskord.dsl.bot
@@ -35,37 +38,45 @@ suspend fun main() {
     if (CONFIG.google_cloud_logging) {
         val googleLogger = LoggingAppender()
         googleLogger.context = root.loggerContext
+        googleLogger.addLoggingEventEnhancer(LoggingEventEnhancer { builder: LogEntry.Builder, event: ILoggingEvent ->
+            builder.addLabel("thread", event.threadName)
+        }.toString())
         googleLogger.setFlushLevel(Level.INFO)
         googleLogger.setLog("temptaking.log")
         googleLogger.start()
         root.addAppender(googleLogger)
     }
 
+    var started = false
+
     bot(CONFIG.bot_token) {
         started {
-            database = Database(File(CONFIG.user_file), CONFIG.polling_rate, CONFIG.UTC_offset_hrs, CONFIG.randomise_time,
-                notifyScheduled = { s, t ->
-                    GlobalScope.launch {
-                        val dm = clientStore.discord.createDM(CreateDM(s))
-                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Randomised temperature taking scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
-                        root.info("NOTIFY user [${dm.id}] temperature taking scheduled")
-                    }
-                },
-                notifyFilled = { s, t ->
-                    GlobalScope.launch {
-                        val dm = clientStore.discord.createDM(CreateDM(s))
-                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Temperature taken at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
-                        root.info("NOTIFY user [${dm.id}] temperature taking task executed")
-                    }
-                },
-                fillFailed = { s, t ->
-                    GlobalScope.launch {
-                        val dm = clientStore.discord.createDM(CreateDM(s))
-                        ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Error FAILED to fill form at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}, please fill in the form yourself\n${Form.url}")
-                        root.info("NOTIFY user [${dm.id}] temperature taking task FAILED")
-                    }
-                })
-            Form.setTimeout(CONFIG.webdriver_wait_time.toLong())
+            if (!started) {
+                started = true
+                database = Database(File(CONFIG.user_file), CONFIG.polling_rate, CONFIG.UTC_offset_hrs, CONFIG.randomise_time,
+                    notifyScheduled = { s, t ->
+                        GlobalScope.launch {
+                            val dm = clientStore.discord.createDM(CreateDM(s))
+                            ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Randomised temperature taking scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                            root.info("NOTIFY user [${dm.id}] temperature taking scheduled")
+                        }
+                    },
+                    notifyFilled = { s, t ->
+                        GlobalScope.launch {
+                            val dm = clientStore.discord.createDM(CreateDM(s))
+                            ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Temperature taken at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                            root.info("NOTIFY user [${dm.id}] temperature taking task executed")
+                        }
+                    },
+                    fillFailed = { s, t ->
+                        GlobalScope.launch {
+                            val dm = clientStore.discord.createDM(CreateDM(s))
+                            ChannelClient(CONFIG.bot_token, dm.id).sendMessage("Error FAILED to fill form at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}, please fill in the form yourself\n${Form.url}")
+                            root.info("NOTIFY user [${dm.id}] temperature taking task FAILED")
+                        }
+                    })
+                Form.setTimeout(CONFIG.webdriver_wait_time.toLong())
+            }
         }
         commands("$") {
             command("help-temptaking") {
