@@ -26,7 +26,7 @@ dependencies {
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
     testImplementation("junit:junit:4.12")
 
-    implementation("com.jessecorbett:diskord:1.8.1")
+    implementation("com.jessecorbett:diskord:1.6.2")
 
     implementation("org.seleniumhq.selenium:selenium-java:$selenium_version")
     implementation("org.seleniumhq.selenium:selenium-chrome-driver:$selenium_version")
