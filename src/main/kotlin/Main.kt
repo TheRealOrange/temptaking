@@ -186,7 +186,7 @@ suspend fun main() {
                         helptext += "\noptions:\n"
                         helptext += "     `help` to show this again\n"
                         helptext += "     `show` to show current settings\n"
-                        helptext += "     `add` to add a new task for the current day"
+                        helptext += "     `add` to add a new task for the current day\n"
                         helptext += "     `cancel` to cancel the current task\n"
                         if (words.size < 2)
                             reply(helptext)
