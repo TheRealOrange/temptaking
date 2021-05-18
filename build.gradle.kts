@@ -31,11 +31,11 @@ dependencies {
     implementation("org.seleniumhq.selenium:selenium-java:$selenium_version")
     implementation("org.seleniumhq.selenium:selenium-chrome-driver:$selenium_version")
 
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:1.7.26")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("ch.qos.logback:logback-core:$logback_version")
 
-    implementation("com.google.cloud:google-cloud-logging-logback:0.120.8-alpha")
+    implementation("com.google.cloud:google-cloud-logging-logback:0.117.0-alpha")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
 }

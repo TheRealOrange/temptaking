@@ -2,6 +2,7 @@ package database
 
 import database.data.User
 import database.data.Users
+import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import msforms.Form
 import root
@@ -13,6 +14,7 @@ import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.random.Random
 
+@UnstableDefault
 class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifyScheduled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, notifyFilled: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }, fillFailed: ((discordId: String, time: LocalDateTime)->Unit) = { _, _ -> }) {
     private var file = f
     private val users = mutableMapOf<String, User>()
