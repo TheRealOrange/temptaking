@@ -1,8 +1,8 @@
 plugins {
     application
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    kotlin("jvm") version "1.3.70"
-    kotlin("plugin.serialization") version "1.3.70"
+    kotlin("jvm") version "1.5.0"
+    kotlin("plugin.serialization") version "1.5.0"
 }
 
 application {
@@ -20,22 +20,22 @@ repositories {
 }
 
 dependencies {
-    val selenium_version = "4.0.0-alpha-6"
+    val selenium_version = "4.0.0-alpha-7"
     val logback_version = "1.2.3"
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
     testImplementation("junit:junit:4.12")
 
-    implementation("com.jessecorbett:diskord:1.6.2")
+    implementation("com.jessecorbett:diskord:1.8.1")
 
     implementation("org.seleniumhq.selenium:selenium-java:$selenium_version")
     implementation("org.seleniumhq.selenium:selenium-chrome-driver:$selenium_version")
 
-    implementation("org.slf4j:slf4j-api:1.7.26")
+    implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("ch.qos.logback:logback-core:$logback_version")
 
-    implementation("com.google.cloud:google-cloud-logging-logback:0.117.0-alpha")
+    implementation("com.google.cloud:google-cloud-logging-logback:0.120.8-alpha")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
 }
