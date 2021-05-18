@@ -203,7 +203,7 @@ suspend fun main() {
                                 "cancel" -> {
                                     val t = database.task(authorId)
                                     if (t != null) {
-                                        if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
+                                        if (t.isAfter(database.timeNow())) reply("The temperature taking task has already been executed")
                                         else {
                                             database.cancel(authorId)
                                             reply("The temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)} has been cancelled")
