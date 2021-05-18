@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    val selenium_version = "4.0.0-alpha-7"
+    val selenium_version = "4.0.0-alpha-6"
     val logback_version = "1.2.3"
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
