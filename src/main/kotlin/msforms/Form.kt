@@ -3,12 +3,19 @@ package msforms
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.TimeoutException
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.FluentWait
+import org.openqa.selenium.support.ui.Wait
 import org.openqa.selenium.support.ui.WebDriverWait
 import root
 import java.time.Duration
+import java.util.concurrent.TimeUnit
+import kotlin.NoSuchElementException
+
 
 object Form {
     val url = "https://forms.office.com/Pages/ResponsePage.aspx?id=cnEq1_jViUiahddCR1FZKi_YUnieBUBCi4vce5KjIHVUMkoxVUdBMVo2VUJTNFlSU1dFNEtNWUwxNS4u"
@@ -23,12 +30,11 @@ object Form {
     val sendEmailReceipt = "//*[@id=\"form-container\"]//span[@class=\"office-form-email-receipt-checkbox-description\"]"
     val submitButton = "//*[@id=\"form-container\"]//button[@title=\"Submit\""
 
-    val submittedValidate = "//*[@id=\"form-container\"]//div[@class=\"thank-you-page-container thank-you-page-message\"]/span[text()=\"Your response was submitted.\"]"
+    val submittedValidate = "//*[@id=\"form-container\"]//div[@class=\"thank-you-page-container thank-you-page-message\"]/span"
 
     val options = ChromeOptions()
 
     var waitTime: Long = 5
-    //*[@id="form-container"]/div/div/div/div/div[1]/div[2]/div[2]/div/div/div/div[2]/div/div/input
 
     init {
         options.addArguments(
@@ -44,26 +50,34 @@ object Form {
     fun setTimeout(time: Long) {
         waitTime = time
     }
+    fun waitFunc(locator:By): (WebDriver)->WebElement {
+        return {
+            it.findElement(locator)
+        }
+    }
 
     fun verifyLogin(userName: String, password:String): Boolean {
         val driver = ChromeDriver(options)
-        val wait = WebDriverWait(driver, Duration.ofSeconds(waitTime))
+        val wait: Wait<WebDriver> = FluentWait<WebDriver>(driver)
+            .withTimeout(Duration.ofSeconds(waitTime))
+            .pollingEvery(Duration.ofSeconds(0.2.toLong()))
+            .ignoring(NoSuchElementException::class.java)
         var valid = false
         try {
             root.info("validating user [user $userName] connecting")
             driver.get(url)
-            val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
+            val usernameBox = wait.until(waitFunc(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
             root.info("validating user [user $userName] username filled")
 
-            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
-            val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
+            wait.until { it.findElement(By.xpath(userNameField)).text == userName }
+            val passwordBox = wait.until(waitFunc(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
             root.info("validating user [user $userName] password filled")
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(dontStaySignedIn))).click()
+            wait.until(waitFunc(By.xpath(dontStaySignedIn))).click()
 
-            val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
+            val tempInput = wait.until(waitFunc(By.xpath(temperatureField)))
             root.info("validating user [user $userName] validated")
             valid = true
         } catch(e: TimeoutException) {
@@ -82,20 +96,20 @@ object Form {
         try {
             root.info("filling form [user $userName] connecting")
             driver.get(url)
-            val usernameBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(userNameField)))
+            val usernameBox = wait.until(waitFunc(By.xpath(userNameField)))
             usernameBox.sendKeys(userName + Keys.ENTER)
             root.info("filling form [user $userName] username filled")
 
-            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(usernameWait), userName))
-            val passwordBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(passwordField)))
+            wait.until { it.findElement(By.xpath(userNameField)).text == userName }
+            val passwordBox = wait.until(waitFunc(By.xpath(passwordField)))
             passwordBox.sendKeys(password + Keys.ENTER)
             root.info("filling form [user $userName] password filled")
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(dontStaySignedIn))).click()
+            wait.until(waitFunc(By.xpath(dontStaySignedIn))).click()
 
-            val tempInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(temperatureField)))
-            val sendReceipt = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(sendEmailReceipt)))
-            val submitForm = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath(submitButton))))
+            val tempInput = wait.until(waitFunc(By.xpath(temperatureField)))
+            val sendReceipt = wait.until(waitFunc(By.xpath(sendEmailReceipt)))
+            val submitForm = wait.until(waitFunc((By.xpath(submitButton))))
             root.info("filling form [user $userName] form filled")
 
             tempInput.sendKeys(String.format("%.1f", temp))
@@ -103,7 +117,7 @@ object Form {
             submitForm.click()
             root.info("filling form [user $userName] done")
 
-            wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(submittedValidate), "Your response was submitted."))
+            wait.until { it.findElement(By.xpath(submittedValidate)).text == "Your response was submitted." }
             root.info("filling form [user $userName] validated form fill")
             valid = true
         } catch(e: TimeoutException) {
