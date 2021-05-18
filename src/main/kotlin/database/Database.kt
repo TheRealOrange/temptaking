@@ -56,22 +56,29 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
                         var delay = 5000L
                         if (randomTime) delay = Random.nextLong(0, remaining) * 60 * 1000
                         if (it.value.notify) scheduled.invoke(it.value.discordUsername, now.plusSeconds(delay/1000))
-                        val t = Timer()
-                        t.schedule(timerTask {
-                            val success = Form.fillForm(
-                                it.value.msEmail,
-                                it.value.msPassword,
-                                Random.nextInt(360, 370).toFloat() / 10,
-                                it.value.emailReceipt
-                            )
-                            if (it.value.notify) filled.invoke(it.value.discordUsername, timeNow())
-                            if (!success) failed.invoke(it.value.discordUsername, timeNow())
-                        }, delay)
-                        scheduledTasks[it.value.discordUsername]= Pair(t, now.plusSeconds(delay/1000))
+                        scheduleTask(it.value, delay, now)
                     }
                 } else if (now.hour > 9) taken = false
             }
         },10000,time)
+    }
+    fun scheduleTask(user: User, delay: Long, now: LocalDateTime) {
+        val t = Timer()
+        t.schedule(timerTask {
+            val success = Form.fillForm(
+                user.msEmail,
+                user.msPassword,
+                Random.nextInt(360, 370).toFloat() / 10,
+                user.emailReceipt
+            )
+            if (user.notify) filled.invoke(user.discordUsername, timeNow())
+            if (!success) failed.invoke(user.discordUsername, timeNow())
+        }, delay)
+        scheduledTasks[user.discordUsername]= Pair(t, now.plusSeconds(delay/1000))
+    }
+
+    fun scheduleTask(discordUsername: String, delay: Long, now: LocalDateTime) {
+        scheduleTask(users[discordUsername], delay, now)
     }
 
     fun timeNow(): LocalDateTime = LocalDateTime.now().atZone(ZoneOffset.UTC).withZoneSameInstant(zoneOffset).toLocalDateTime()
