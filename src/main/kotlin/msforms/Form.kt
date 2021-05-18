@@ -38,6 +38,7 @@ object Form {
 
     init {
         options.addArguments(
+            "--verbose",
             "--headless",
             "--disable-gpu",
             "--window-size=1920,1200",
