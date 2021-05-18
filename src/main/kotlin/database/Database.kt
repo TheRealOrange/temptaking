@@ -107,13 +107,13 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
 
     private fun loadData() {
         val data = file.readText()
-        val saveUsers = Json.decodeFromString(Users.serializer(), data)
+        val saveUsers = Json.parse(Users.serializer(), data)
         saveUsers.users.forEach { users[it.discordUsername] = it }
     }
 
     private fun saveData() {
         val saveUsers = Users(users.values.toList())
-        val data = Json.encodeToString(Users.serializer(), saveUsers)
+        val data = Json.stringify(Users.serializer(), saveUsers)
         file.writeText(data)
     }
 }

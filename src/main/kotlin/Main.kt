@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.format.DateTimeFormatter
 
-val CONFIG = Json.decodeFromString(Config.serializer(), File("data/app_config.json").readText())
+val CONFIG = Json.parse(Config.serializer(), File("data/app_config.json").readText())
 val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 lateinit var database: Database
 

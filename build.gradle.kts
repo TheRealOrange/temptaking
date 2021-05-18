@@ -1,8 +1,8 @@
 plugins {
     application
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    kotlin("jvm") version "1.5.0"
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("jvm") version "1.3.70"
+    kotlin("plugin.serialization") version "1.3.70"
 }
 
 application {
@@ -37,8 +37,7 @@ dependencies {
 
     implementation("com.google.cloud:google-cloud-logging-logback:0.120.8-alpha")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
 }
 
 fun Configuration.isDeprecated(): Boolean =
