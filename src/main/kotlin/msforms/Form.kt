@@ -20,15 +20,14 @@ object Form {
     val usernameWait = "//*[@id=\"displayName\"]"
 
     val temperatureField = "//*[@id=\"form-container\"]//input[@aria-labelledby=\"QuestionId_r97220fafc5db4128a434b19ba048f666\"]"
-    val sendEmailReceipt = "//*[@id=\"form-container\"]//span[@class=\"office-form-email-receipt-checkbox-description\"]"
-    val submitButton = "//*[@id=\"form-container\"]//button[@title=\"Submit\""
+    val sendEmailReceipt = "//*[@id=\"form-container\"]//div[@class=\"office-form-email-receipt-checkbox\"]/div/div/label/input"
+    val submitButton = "//*[@id=\"form-container\"]//button[@title=\"Submit\"]"
 
     val submittedValidate = "//*[@id=\"form-container\"]//div[@class=\"thank-you-page-container thank-you-page-message\"]/span[text()=\"Your response was submitted.\"]"
 
     val options = ChromeOptions()
 
     var waitTime: Long = 5
-    //*[@id="form-container"]/div/div/div/div/div[1]/div[2]/div[2]/div/div/div/div[2]/div/div/input
 
     init {
         options.addArguments(
