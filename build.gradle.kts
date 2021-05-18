@@ -37,7 +37,8 @@ dependencies {
 
     implementation("com.google.cloud:google-cloud-logging-logback:0.120.8-alpha")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
 }
 
 fun Configuration.isDeprecated(): Boolean =
