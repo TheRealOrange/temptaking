@@ -186,6 +186,7 @@ suspend fun main() {
                         helptext += "\noptions:\n"
                         helptext += "     `help` to show this again\n"
                         helptext += "     `show` to show current settings\n"
+                        helptext += "     `add` to add a new task for the current day"
                         helptext += "     `cancel` to cancel the current task\n"
                         if (words.size < 2)
                             reply(helptext)
@@ -195,10 +196,19 @@ suspend fun main() {
                                 "show" -> {
                                     val t = database.task(authorId)
                                     if (t != null) {
-                                        reply("You have a temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
-                                        if (t.isAfter(database.timeNow())) reply("The temperature taking task has been executed")
-                                        else reply("Use `\$task cancel` to cancel")
+                                        if (t.isBefore(database.timeNow())) reply("A temperature taking task has been executed at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}")
+                                        else reply("You have a temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}\nUse `\$task cancel` to cancel")
                                     } else reply("You have no temperature taking task scheduled")
+                                }
+                                "add" -> {
+                                    var t = database.task(authorId)
+                                    if (t != null && t.isAfter(database.timeNow())) {
+                                        reply("A temperature taking task is already scheduled at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}.")
+                                    } else {
+                                        database.scheduleTask(authorId, 10, database.timeNow())
+                                        t = database.task(authorId)
+                                        reply("Temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}.")
+                                    }
                                 }
                                 "cancel" -> {
                                     val t = database.task(authorId)
