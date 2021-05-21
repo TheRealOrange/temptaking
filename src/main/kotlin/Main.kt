@@ -81,7 +81,7 @@ suspend fun main() {
         commands("$") {
             command("help") {
                 root.info("command HELP-TEMPTAKING issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
-                if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help-temptaking for more detail")
+                if (guildId != null) reply("Register with me via DM, and I can help you automatically submit your temperature every morning\nDM \$help for more detail")
                 else reply("Commands:\n`\$register [email] [password]`        use this command to register with the bot\n`\$deregister`        use this command to deregister\n`\$settings help`        use this command to change settings\n`\$task help`        use this command to manage active task")
             }
 
