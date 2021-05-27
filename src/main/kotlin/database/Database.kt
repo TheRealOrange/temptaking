@@ -62,6 +62,17 @@ class Database(f: File, minutes: Int, offset: Int, randomise:Boolean, notifySche
             }
         },10000,time)
     }
+
+    fun scheduleAll(delay: Long): List<Pair<LocalDateTime, String>> {
+        val now = timeNow()
+        val userNames = mutableListOf<Pair<LocalDateTime, String>>()
+        users.forEach {
+            scheduleTask(it.value, delay, now)
+            userNames.add(Pair(now.plusSeconds(delay/1000), it.value.discordUsername))
+        }
+        return userNames.toList()
+    }
+
     fun scheduleTask(user: User, delay: Long, now: LocalDateTime) {
         val t = Timer()
         t.schedule(timerTask {

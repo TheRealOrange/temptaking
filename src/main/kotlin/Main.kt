@@ -85,6 +85,20 @@ suspend fun main() {
                 else reply("Commands:\n`\$register [email] [password]`        use this command to register with the bot\n`\$deregister`        use this command to deregister\n`\$settings help`        use this command to change settings\n`\$task help`        use this command to manage active task")
             }
 
+            command("force_event") {
+                root.info("command FORCE_EVENT issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
+                if (guildId != null) {
+                    if (CONFIG.delete_msgs_in_server) this.delete()
+                    reply("Please perform operations by DM")
+                } else if (authorId != CONFIG.bot_owner) {
+                    reply("Only the bot owner can trigger this action.")
+                } else  {
+                    database.scheduleAll(60000).forEach {
+                        reply("Temperature taking task scheduled for user ${it.second} at ${DateTimeFormatter.ofPattern(timeFormatter).format(it.first)}.")
+                    }
+                }
+            }
+
             command("register") {
                 root.info("command REGISTER issued by [${author.username}, ${authorId}] in guild ${if(guildId == null) "null" else guildId} text: $content")
                 if (guildId != null) {
@@ -205,7 +219,7 @@ suspend fun main() {
                                     if (t != null && t.isAfter(database.timeNow())) {
                                         reply("A temperature taking task is already scheduled at ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}.")
                                     } else {
-                                        database.scheduleTask(authorId, 10, database.timeNow())
+                                        database.scheduleTask(authorId, 30000, database.timeNow())
                                         t = database.task(authorId)
                                         reply("Temperature taking task scheduled for ${DateTimeFormatter.ofPattern(timeFormatter).format(t)}.")
                                     }

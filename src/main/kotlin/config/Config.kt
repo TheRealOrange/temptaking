@@ -11,5 +11,6 @@ data class Config(
     val delete_msgs_in_server: Boolean,
     val randomise_time: Boolean,
     val UTC_offset_hrs: Int,
-    val google_cloud_logging: Boolean
+    val google_cloud_logging: Boolean,
+    val bot_owner: String
 )
